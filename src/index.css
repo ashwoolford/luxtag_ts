@@ -24,3 +24,11 @@
   padding: 30px 50px;
   margin: 20px 0;
 }
+
+.chart-container {
+  position: relative;
+  margin: auto;
+  height: auto;
+  width: 50vw;
+  margin-top: 40px;
+}
