@@ -27,8 +27,7 @@
 
 .chart-container {
   position: relative;
-  margin: auto;
-  height: auto;
-  width: 50vw;
+  height: 40vh;
+  width: auto;
   margin-top: 40px;
 }

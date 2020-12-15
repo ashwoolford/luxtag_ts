@@ -9,7 +9,14 @@ const RecentSubmissions: React.FC<{}> = () => {
 
   const getWarranties = async () => {
     try {
-      await fetch("http://localhost:4000/api/get-warranties")
+      await fetch("http://localhost:4000/api/get-warranties", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          authorization:
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhc2h3b29sZm9yZEBnbWFpbC5jb20iLCJuYW1lIjoiQXNocmFmIEhvc3NhaW4iLCJpYXQiOjE2MDgwMTIyOTAsImV4cCI6MTYwODI3MTQ5MH0.BetzsDmYfs_W_S8n2oFSCbacdwwcAVjATFNn7gVMrWo",
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
           setIsLoaded(true);

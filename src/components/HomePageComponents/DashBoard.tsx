@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import Chart from "chart.js";
-import { Layout } from "antd";
+import { Layout, Row, Col } from "antd";
 
 const DashBoard: React.FC<{}> = () => {
   const { Content } = Layout;
@@ -59,16 +59,21 @@ const DashBoard: React.FC<{}> = () => {
 
   const getWarranties = async () => {
     try {
-      await fetch("http://localhost:4000/api/get-warranties")
+      await fetch("http://localhost:4000/api/get-warranties", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          authorization:
+            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhc2h3b29sZm9yZEBnbWFpbC5jb20iLCJuYW1lIjoiQXNocmFmIEhvc3NhaW4iLCJpYXQiOjE2MDgwMTIyOTAsImV4cCI6MTYwODI3MTQ5MH0.BetzsDmYfs_W_S8n2oFSCbacdwwcAVjATFNn7gVMrWo",
+        },
+      })
         .then((res) => res.json())
         .then((data) => {
-          console.log(data);
 
           const stateCount = new Map();
           const dateFrequency = new Map();
 
-          data.map((warranty: any) => {
-
+          data.map((warranty: any, index: number) => {
             if (stateCount.has(warranty.state)) {
               stateCount.set(
                 warranty.state,
@@ -106,9 +111,7 @@ const DashBoard: React.FC<{}> = () => {
           setBgColors(bgColors);
           setNumbersOfState(numbersOfState);
 
-
           //for date frequency
-
 
           const purchaseDate: string[] = [];
           const numbersOfSubmissions: number[] = [];
@@ -120,7 +123,6 @@ const DashBoard: React.FC<{}> = () => {
 
           setPurchaseOfDate(purchaseDate);
           setPurchaseCount(numbersOfSubmissions);
-
         });
     } catch (err) {
       console.error(err.message);
@@ -155,8 +157,8 @@ const DashBoard: React.FC<{}> = () => {
             type: "line",
             data: lineChartDate,
             options: {
-              responsive: true, // Instruct chart js to respond nicely.
-              maintainAspectRatio: false, // Add to prevent default behaviour of full-width/height
+              responsive: true, 
+              maintainAspectRatio: false
             },
           });
         }
@@ -171,21 +173,31 @@ const DashBoard: React.FC<{}> = () => {
         style={{
           padding: 24,
           margin: 0,
-          height: "100%"
+          height: "100%",
         }}
       >
         <h3>DashBoard</h3>
-        <h3 style={{ textAlign: "center" }}>Submissions in order to States</h3>
 
-        <div className="chart-container">
-          <canvas ref={canvasRefDoughnut}></canvas>
-        </div>
+        <Row>
+          <Col span={12}>
+            <h3 style={{ textAlign: "center" }}>
+              Submissions in order to States
+            </h3>
 
-        <h3 style={{ textAlign: "center" }}>Submissions in order to Date</h3>
+            <div className="chart-container">
+              <canvas ref={canvasRefDoughnut}></canvas>
+            </div>
+          </Col>
+          <Col span={12}>
+            <h3 style={{ textAlign: "center" }}>
+              Submissions in order to Date
+            </h3>
 
-        <div className="chart-container">
-          <canvas ref={canvasRefLine}></canvas>
-        </div>
+            <div className="chart-container">
+              <canvas ref={canvasRefLine}></canvas>
+            </div>
+          </Col>
+        </Row>
       </Content>
     </Layout>
   );
