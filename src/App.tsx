@@ -1,25 +1,44 @@
-import React from 'react';
-import './App.css';
-import { Layout, Menu } from 'antd';
-import TopNavBar from './components/TopNavBar';
-import HomePage from './components/HomePage';
-import About from './components/About';
+import React, { useState } from "react";
+import "./App.css";
+import { Layout, Menu } from "antd";
+import HomePage from "./components/HomePage";
+import About from "./components/About";
 import { HashRouter, Route } from "react-router-dom";
-import DetailsForm from './components/DetailsPage/DetailsForm';
-import AuthenticationPage from './components/AuthComponents/AuthenticationPage';
+import { AuthContext, TokenContext } from "./Context/UserContext";
+import DetailsForm from "./components/DetailsPage/DetailsForm";
+import AuthenticationPage from "./components/AuthComponents/AuthenticationPage";
+import ProtectedRoute from "./Routes/ProtectedRoute";
 
-const App = () =>{
+const App = () => {
+  const [isAuth, setIsAuth] = useState<boolean>(false);
+  const [token, setToken] = useState<string>("");
+
   return (
-    
-    <Layout style={{ minHeight: '100vh' }}>
-      <HashRouter basename="/">
-        <TopNavBar />
-        <Route exact path="/" component={AuthenticationPage} />
-        <Route path="/about" component={About}></Route>
-        <Route path="/details-form" component={DetailsForm}></Route>
-      </HashRouter>
+    <Layout style={{ minHeight: "100vh" }}>
+      <AuthContext.Provider value={{ isAuth, setIsAuth }}>
+        <TokenContext.Provider value={{ token, setToken }}>
+          <HashRouter basename="/">
+            <Route exact path="/" component={AuthenticationPage} />
+            <ProtectedRoute
+              component={HomePage}
+              isAuthenticated={isAuth}
+              path="/home"
+            />
+            <ProtectedRoute
+              component={About}
+              isAuthenticated={isAuth}
+              path="/about"
+            />
+            <ProtectedRoute
+              component={DetailsForm}
+              isAuthenticated={isAuth}
+              path="/details-form"
+            />
+          </HashRouter>
+        </TokenContext.Provider>
+      </AuthContext.Provider>
     </Layout>
   );
-}
+};
 
 export default App;

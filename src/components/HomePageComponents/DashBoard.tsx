@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import Chart from "chart.js";
+import { useToken } from "../../Context/UserContext";
+
 import { Layout, Row, Col } from "antd";
 
 const DashBoard: React.FC<{}> = () => {
@@ -11,12 +13,10 @@ const DashBoard: React.FC<{}> = () => {
   const [bgColors, setBgColors] = useState<string[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
 
-  //
-
   const [purchaseOfDate, setPurchaseOfDate] = useState<string[]>([]);
   const [purchaseCount, setPurchaseCount] = useState<number[]>([]);
 
-  //
+  const { token } = useToken();
 
   const randomColorGen = () => {
     return "#" + Math.floor(Math.random() * 16777215).toString(16);
@@ -63,13 +63,11 @@ const DashBoard: React.FC<{}> = () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhc2h3b29sZm9yZEBnbWFpbC5jb20iLCJuYW1lIjoiQXNocmFmIEhvc3NhaW4iLCJpYXQiOjE2MDgwMTIyOTAsImV4cCI6MTYwODI3MTQ5MH0.BetzsDmYfs_W_S8n2oFSCbacdwwcAVjATFNn7gVMrWo",
+          authorization: `Bearer ${token}`,
         },
       })
         .then((res) => res.json())
         .then((data) => {
-
           const stateCount = new Map();
           const dateFrequency = new Map();
 
@@ -149,20 +147,18 @@ const DashBoard: React.FC<{}> = () => {
   }, [numbersOfState]);
 
   useEffect(() => {
+    const ctx = canvasRefLine.current?.getContext("2d");
 
-        const ctx = canvasRefLine.current?.getContext("2d");
-
-        if (ctx && purchaseOfDate.length != 0 && purchaseCount.length != 0) {
-          new Chart(ctx, {
-            type: "line",
-            data: lineChartDate,
-            options: {
-              responsive: true, 
-              maintainAspectRatio: false
-            },
-          });
-        }
-
+    if (ctx && purchaseOfDate.length != 0 && purchaseCount.length != 0) {
+      new Chart(ctx, {
+        type: "line",
+        data: lineChartDate,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+        },
+      });
+    }
   }, [purchaseOfDate, purchaseCount]);
 
   return (
@@ -180,8 +176,8 @@ const DashBoard: React.FC<{}> = () => {
 
         <Row>
           <Col span={12}>
-            <h3 style={{ textAlign: "center" }}>
-              Submissions in order to States
+            <h3 style={{ textAlign: "center", marginTop: "30px" }}>
+              Submissions based on States
             </h3>
 
             <div className="chart-container">
@@ -189,9 +185,7 @@ const DashBoard: React.FC<{}> = () => {
             </div>
           </Col>
           <Col span={12}>
-            <h3 style={{ textAlign: "center" }}>
-              Submissions in order to Date
-            </h3>
+            <h3 style={{ textAlign: "center" }}>Submissions based on Date</h3>
 
             <div className="chart-container">
               <canvas ref={canvasRefLine}></canvas>

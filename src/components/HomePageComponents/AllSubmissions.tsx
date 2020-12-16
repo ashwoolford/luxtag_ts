@@ -1,31 +1,57 @@
 import React, { useState, useEffect } from "react";
-import { Table, Layout, Spin, Modal } from "antd";
-import DetailsForm from "../DetailsPage/DetailsForm";
-import { Link } from "react-router-dom";
+import {
+  Table,
+  Input,
+  InputNumber,
+  Popconfirm,
+  Form,
+  Layout,
+  Spin,
+} from "antd";
+import { useAuthStatus, useToken } from "../../Context/UserContext";
 
-interface warrantyObject {
-  id: number;
-  warranty_card_no: string;
-  product_serial_no: string;
-  date_of_purchase: string;
-  name: string;
-  ic_no: string;
-  dob: string;
-  email: string;
-  person_id: number;
-  contract_no: string;
-  state: string;
-}
+const EditableCell = ({
+  editing,
+  dataIndex,
+  title,
+  inputType,
+  record,
+  index,
+  children,
+  ...restProps
+}) => {
+  const inputNode = inputType === "number" ? <InputNumber /> : <Input />;
+  return (
+    <td {...restProps}>
+      {editing ? (
+        <Form.Item
+          name={dataIndex}
+          style={{
+            margin: 0,
+          }}
+          rules={[
+            {
+              required: true,
+              message: `Please Input ${title}!`,
+            },
+          ]}
+        >
+          {inputNode}
+        </Form.Item>
+      ) : (
+        children
+      )}
+    </td>
+  );
+};
 
-const AllSubmissions: React.FC<{}> = () => {
-  const { Content } = Layout;
-
-  const [recentWarranties, setRecentWarranties] = useState([]);
+const AllSubmissions: React.FC<{}> = ({}) => {
+  const [form] = Form.useForm();
+  const [data, setData] = useState<any>();
+  const [editingKey, setEditingKey] = useState("");
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
-
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-
-  const [currentWarranty, setCurrentWarranty] = useState<warrantyObject>();
+  const { Content } = Layout;
+  const { token } = useToken();
 
   const getWarranties = async () => {
     try {
@@ -33,14 +59,13 @@ const AllSubmissions: React.FC<{}> = () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhc2h3b29sZm9yZEBnbWFpbC5jb20iLCJuYW1lIjoiQXNocmFmIEhvc3NhaW4iLCJpYXQiOjE2MDgwMTIyOTAsImV4cCI6MTYwODI3MTQ5MH0.BetzsDmYfs_W_S8n2oFSCbacdwwcAVjATFNn7gVMrWo",
+          authorization: `Bearer ${token}`,
         },
       })
         .then((res) => res.json())
         .then((data) => {
+          setData(data);
           setIsLoaded(true);
-          setRecentWarranties(data);
         });
     } catch (err) {
       console.error(err.message);
@@ -49,64 +74,151 @@ const AllSubmissions: React.FC<{}> = () => {
 
   useEffect(() => {
     getWarranties();
-  });
+  }, []);
+
+  const updateWarrantyInfo = async (newData) => {
+    await fetch(`http://localhost:4000/api/update-warranty/${newData.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        authorization:
+          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhc2h3b29sZm9yZEBnbWFpbC5jb20iLCJuYW1lIjoiQXNocmFmIEhvc3NhaW4iLCJpYXQiOjE2MDgxMjY5OTEsImV4cCI6MTYwODM4NjE5MX0.iIn__Z7pQ3XvZ6gndXwdWbq0X75vXvTl0MOwkjG5eHI",
+      },
+      body: JSON.stringify({
+        warranty_card_no: newData.warranty_card_no,
+        product_serial_no: newData.product_serial_no,
+        date_of_purchase: newData.date_of_purchase,
+        person_id: newData.person_id,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status !== 200) {
+          throw "not updated";
+        }
+        console.log(data);
+      });
+  };
+
+  useEffect(() => {
+    console.log("Editing key", editingKey);
+  }, [editingKey]);
+
+  const isEditing = (record) => record.id === editingKey;
+
+  const edit = (record) => {
+    console.log("edit button ", record);
+    form.setFieldsValue({
+      warranty_card_no: "",
+      product_serial_no: "",
+      date_of_purchase: "",
+      ...record,
+    });
+    setEditingKey(record.id);
+  };
+
+  const cancel = () => {
+    setEditingKey("");
+  };
+
+  const save = async (id) => {
+    try {
+      const row = await form.validateFields();
+      const newData = [...data];
+      const index = newData.findIndex((item) => id === item.id);
+
+      if (index > -1) {
+        const item = newData[index];
+        newData.splice(index, 1, { ...item, ...row });
+        setData(newData);
+        setEditingKey("");
+      } else {
+        newData.push(row);
+        setData(newData);
+        setEditingKey("");
+      }
+
+      await updateWarrantyInfo(newData[index]);
+    } catch (errInfo) {
+      console.log("Validate Failed:", errInfo);
+    }
+  };
 
   const columns = [
     {
-      title: "Warranty No.",
+      title: "Warranty Card No",
       dataIndex: "warranty_card_no",
-      key: "warrantyno",
+      width: "25%",
+      editable: true,
     },
     {
-      title: "Product S.N.",
+      title: "Product Serial No",
       dataIndex: "product_serial_no",
-      key: "productsn",
+      width: "15%",
+      editable: true,
     },
     {
       title: "Date of Purchase",
       dataIndex: "date_of_purchase",
-      key: "dateofpurchase",
+      width: "15%",
+      editable: true,
     },
     {
       title: "Name",
       dataIndex: "name",
-      key: "name",
+      width: "15%",
+      editable: false,
     },
     {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "Contract no.",
-      key: "contractno",
+      title: "Contract No",
       dataIndex: "contract_no",
+      width: "15%",
+      editable: false,
     },
     {
-      title: "Action",
-      key: "action",
-      render: (obj: warrantyObject) => (
-        <a
-          onClick={() => {
-            
-            setCurrentWarranty(obj);
-            setIsModalVisible(!isModalVisible);
-          }}
-        >
-          Edit
-        </a>
-      ),
+      title: "operation",
+      dataIndex: "operation",
+      render: (_, record) => {
+        // console.log("record ", record);
+        const editable = isEditing(record);
+        return editable ? (
+          <span>
+            <a
+              href="javascript:;"
+              onClick={() => save(record.id)}
+              style={{
+                marginRight: 8,
+              }}
+            >
+              Save
+            </a>
+            <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
+              <a>Cancel</a>
+            </Popconfirm>
+          </span>
+        ) : (
+          <a onClick={() => edit(record)}>Edit</a>
+        );
+      },
     },
   ];
+  const mergedColumns = columns.map((col) => {
+    // console.log("col -> ", col);
 
-  const handleOk = () => {
-    setIsModalVisible(false);
-  };
+    if (!col.editable) {
+      return col;
+    }
 
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
-
+    return {
+      ...col,
+      onCell: (record) => ({
+        record,
+        dataIndex: col.dataIndex,
+        title: col.title,
+        editing: isEditing(record),
+      }),
+    };
+  });
   return (
     <Layout style={{ padding: "0 24px 24px" }}>
       <span style={{ margin: "16px 0" }} />
@@ -117,17 +229,27 @@ const AllSubmissions: React.FC<{}> = () => {
           style={{
             padding: 24,
             margin: 0,
-            height: 360,
           }}
         >
-          <Table
-            columns={columns}
-            dataSource={recentWarranties}
-            size="small"
-            pagination={{
-              showSizeChanger: true,
-            }}
-          />
+          <div>
+            <h4>All Submissions</h4>
+            <Form form={form} component={false}>
+              <Table
+                components={{
+                  body: {
+                    cell: EditableCell,
+                  },
+                }}
+                bordered
+                dataSource={data}
+                columns={mergedColumns}
+                rowClassName="editable-row"
+                pagination={{
+                  onChange: cancel,
+                }}
+              />
+            </Form>
+          </div>
         </Content>
       ) : (
         <div
@@ -140,27 +262,6 @@ const AllSubmissions: React.FC<{}> = () => {
           <Spin />
         </div>
       )}
-
-      <Modal
-        title="Basic Modal"
-        visible={isModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
-      >
-        <DetailsForm
-          id={currentWarranty?.id}
-          warranty_card_no={currentWarranty?.warranty_card_no}
-          product_serial_no={currentWarranty?.product_serial_no}
-          date_of_purchase={currentWarranty?.date_of_purchase}
-          name={currentWarranty?.name}
-          ic_no={currentWarranty?.ic_no}
-          dob={currentWarranty?.dob}
-          email={currentWarranty?.email}
-          person_id={currentWarranty?.person_id}
-          contract_no={currentWarranty?.contract_no}
-          state={currentWarranty?.state}
-        />
-      </Modal>
     </Layout>
   );
 };

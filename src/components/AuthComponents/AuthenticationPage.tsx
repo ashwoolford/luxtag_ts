@@ -1,24 +1,36 @@
-import React from 'react';
-import { Tabs } from "antd";
-import LoginForm from './LoginForm';
+import { Form, Input, Button, Checkbox, Tabs, Layout } from "antd";
+import LoginForm from "./LoginForm";
+import RegistrationForm from "./RegistrationForm";
 
-const { TabPane } = Tabs;
+const AuthenticationPage = () => {
+  const TabPane = Tabs.TabPane;
+  const { Content } = Layout;
 
-export default function AuthenticationPage() {
+  function callback(key) {
+    console.log(key);
+  }
 
-    function callback(key) {
-      console.log(key);
-    }
+  return (
+    <Layout style={{ padding: "0 24px 24px" }}>
+      <Content
+        className="site-layout-background"
+        style={{
+          padding: 24,
+          margin: 0,
+          height: 360,
+        }}
+      >
+        <Tabs defaultActiveKey="1" onChange={callback} centered>
+          <TabPane tab="Login" key="1">
+            <LoginForm />
+          </TabPane>
+          <TabPane tab="Sign Up" key="2">
+            <RegistrationForm />
+          </TabPane>
+        </Tabs>
+      </Content>
+    </Layout>
+  );
+};
 
-
-    return (
-      <Tabs defaultActiveKey="1" onChange={callback} centered>
-        <TabPane tab="Sign-in" key="1">
-          <LoginForm />
-        </TabPane>
-        <TabPane tab="Sign-up" key="2">
-          Content of Tab Pane 2
-        </TabPane>
-      </Tabs>
-    );
-}
+export default AuthenticationPage;

@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Layout, Table, Spin } from "antd";
+import { useAuthStatus, useToken } from "../../Context/UserContext";
 
 const RecentSubmissions: React.FC<{}> = () => {
   const { Content } = Layout;
 
   const [recentWarranties, setRecentWarranties] = useState([]);
-  const [isLoaded, setIsLoaded] = useState<Boolean>(false);
+  const [isLoaded, setIsLoaded] = useState<boolean>(false);
+  const { token } = useToken();
 
   const getWarranties = async () => {
     try {
@@ -13,8 +15,7 @@ const RecentSubmissions: React.FC<{}> = () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhc2h3b29sZm9yZEBnbWFpbC5jb20iLCJuYW1lIjoiQXNocmFmIEhvc3NhaW4iLCJpYXQiOjE2MDgwMTIyOTAsImV4cCI6MTYwODI3MTQ5MH0.BetzsDmYfs_W_S8n2oFSCbacdwwcAVjATFNn7gVMrWo",
+          authorization: `Bearer ${token}`,
         },
       })
         .then((res) => res.json())
@@ -75,7 +76,7 @@ const RecentSubmissions: React.FC<{}> = () => {
           style={{
             padding: 24,
             margin: 0,
-            height: 360,
+            height: "100%",
           }}
         >
           <div>
@@ -91,10 +92,13 @@ const RecentSubmissions: React.FC<{}> = () => {
           </div>
         </Content>
       ) : (
-        <div style={{
-            textAlign: 'center',
-            marginTop: '20px'
-        }} className="spinner">
+        <div
+          style={{
+            textAlign: "center",
+            marginTop: "20px",
+          }}
+          className="spinner"
+        >
           <Spin />
         </div>
       )}
