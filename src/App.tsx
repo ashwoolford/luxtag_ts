@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import "./App.css";
 import { Layout, Menu } from "antd";
-import HomePage from "./components/HomePage";
-import About from "./components/About";
+import HomePage from "./components/HomePageComponents/HomePage";
+import About from "./components/AboutPageComponents/About";
 import { HashRouter, Route } from "react-router-dom";
 import { AuthContext, TokenContext } from "./Context/UserContext";
-import DetailsForm from "./components/DetailsPage/DetailsForm";
 import AuthenticationPage from "./components/AuthComponents/AuthenticationPage";
 import ProtectedRoute from "./Routes/ProtectedRoute";
 
@@ -28,11 +27,6 @@ const App = () => {
               component={About}
               isAuthenticated={isAuth}
               path="/about"
-            />
-            <ProtectedRoute
-              component={DetailsForm}
-              isAuthenticated={isAuth}
-              path="/details-form"
             />
           </HashRouter>
         </TokenContext.Provider>

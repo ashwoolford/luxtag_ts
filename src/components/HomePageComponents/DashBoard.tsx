@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import Chart from "chart.js";
 import { useToken } from "../../Context/UserContext";
+import { randomColorGen, dateFormatter } from "../../Helper/HelperFunctions";
 
 import { Layout, Row, Col } from "antd";
 
@@ -17,20 +18,6 @@ const DashBoard: React.FC<{}> = () => {
   const [purchaseCount, setPurchaseCount] = useState<number[]>([]);
 
   const { token } = useToken();
-
-  const randomColorGen = () => {
-    return "#" + Math.floor(Math.random() * 16777215).toString(16);
-  };
-
-  const dateFormatter = (zuluDate: String) => {
-    return (
-      zuluDate.substring(0, 4) +
-      "-" +
-      zuluDate.substring(5, 7) +
-      "-" +
-      zuluDate.substring(8, 10)
-    );
-  };
 
   const doughnutChartData: Chart.ChartData = {
     datasets: [
@@ -177,7 +164,7 @@ const DashBoard: React.FC<{}> = () => {
         <Row>
           <Col span={12}>
             <h3 style={{ textAlign: "center", marginTop: "30px" }}>
-              Submissions based on States
+              Warranty Submissions based on States
             </h3>
 
             <div className="chart-container">
@@ -185,7 +172,9 @@ const DashBoard: React.FC<{}> = () => {
             </div>
           </Col>
           <Col span={12}>
-            <h3 style={{ textAlign: "center" }}>Submissions based on Date</h3>
+            <h3 style={{ textAlign: "center", marginTop: "30px" }}>
+              Warranty Submissions based on Date
+            </h3>
 
             <div className="chart-container">
               <canvas ref={canvasRefLine}></canvas>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import TopNavBar from "./TopNavBar";
+import TopNavBar from "../Headers/TopNavBar";
 import { Layout, Menu } from "antd";
 import {
   FileSyncOutlined,
@@ -7,9 +7,9 @@ import {
   PieChartOutlined,
 } from "@ant-design/icons";
 
-import Dashboard from "./HomePageComponents/DashBoard";
-import AllSubmissions from "./HomePageComponents/AllSubmissions";
-import RecentSubmissions from "./HomePageComponents/RecentSubmissions";
+import Dashboard from "./DashBoard";
+import AllSubmissions from "./AllSubmissions";
+import RecentSubmissions from "./RecentSubmissions";
 
 const HomePage: React.FC<{}> = () => {
   const { Sider } = Layout;
